@@ -1,0 +1,1748 @@
+{
+	"info": {
+		"_postman_id": "e33a9f10-a798-4636-af1d-fb08d214d06b",
+		"name": "Generar Token T0 - Inválidos- valores límites",
+		"description": "# ⛓️ Get started here\n\nPostman allows you to test your APIs using simple Javascript code. You can evaluate your response body, headers, cookies, and more using the [ChaiJS BDD](https://www.chaijs.com/api/bdd/) syntax.\n\nThis template guides you through the process of setting up an integration test to ensure that all individual components of an API function together seamlessly.\n\nThe API under test in this collection includes three endpoints for registering and receiving a token, accessing your unique generated name, and unregistering a token:\n\n- POST `/register`\n    \n- POST `/unregister`\n    \n- GET `/my-name`\n    \n\nBy setting up requests in the order of the operation, we can test the flow of data to and from the endpoints and ensure they work together as expected. We also verify that the data persists between requests on the back end.\n\n## 🔖 **How to use this template**\n\n**Step 1:** Check out the requests' documentation to learn more about -\n\n- what each request is meant to do.\n    \n- the tests we've added against each one.\n    \n\n**Step 2:** Run this collection by clicking on \"Run\".\n\n<img src=\"https://content.pstmn.io/84019b0f-69c8-4c5f-98b9-2c90a6f9a0b1/Y29sbGVjdGlvbi1ydW5uZXItYnV0dG9uLmpwZWc=\" width=\"266\" height=\"103\">\n\n**Step 3:** To customize this template, replace the request URLs with your API endpoints and add or edit the tests if needed.\n\n## ℹ️ Resources\n\n[Scripting in Postman](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/)\n\n[Test script examples](https://learning.postman.com/docs/writing-scripts/script-references/test-examples/)\n\n[Postman Sandbox API reference](https://learning.postman.com/docs/sending-requests/grpc/postman-sandbox-api/#writing-assertions)\n\n[Using the Collection Runner](https://learning.postman.com/docs/collections/running-collections/intro-to-collection-runs/)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29750224"
+	},
+	"item": [
+		{
+			"name": "Crear comercio",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"\r",
+							"// Generar el enroller_user_id y guardarlo en una variable de entorno\r",
+							"const enroller_user_id_collector = Math.floor(Math.random() * 1000000);\r",
+							"pm.environment.set(\"enroller_user_id_collector\", enroller_user_id_collector); \r",
+							"\r",
+							"// Generar número de RUT aleatorio de 1000000 a 30000000\r",
+							"function generateRandomRut() {\r",
+							"    const min = 1000000;\r",
+							"    const max = 30000000;\r",
+							"    return Math.floor(Math.random() * (max - min + 1)) + min;\r",
+							"}\r",
+							"\r",
+							"// Calcular el dígito verificador del RUT\r",
+							"function calculateDv(rut) {\r",
+							"    let sum = 0;\r",
+							"    let multiplier = 2;\r",
+							"    \r",
+							"    for (let i = rut.toString().length - 1; i >= 0; i--) {\r",
+							"        sum += rut.toString().charAt(i) * multiplier;\r",
+							"        multiplier = multiplier === 7 ? 2 : multiplier + 1;\r",
+							"    }\r",
+							"\r",
+							"    const remainder = 11 - (sum % 11);\r",
+							"    return remainder === 11 ? '0' : remainder === 10 ? 'K' : remainder.toString();\r",
+							"}\r",
+							"\r",
+							"const rut = generateRandomRut();\r",
+							"const dv = calculateDv(rut);\r",
+							"const tax_id = `${rut}-${dv}`;\r",
+							"\r",
+							"// Guardar el RUT completo en una variable de entorno\r",
+							"pm.environment.set(\"tax_id\", tax_id);\r",
+							"\r",
+							"// Generar emails automaticamente\r",
+							"function generateRandomEmail() {\r",
+							"    const caracteres = 'abcdefghijklmnopqrstuvwxyz0123456789';\r",
+							"    let nombre = '';\r",
+							"    for (let i = 0; i < 10; i++) {\r",
+							"        nombre += caracteres.charAt(Math.floor(Math.random() * caracteres.length));\r",
+							"    }\r",
+							"    return `${nombre}@example.com`;\r",
+							"}\r",
+							"\r",
+							"// Generar el email y guardarlo en una variable de entorno\r",
+							"const email = generateRandomEmail();\r",
+							"pm.environment.set(\"randomemail\", email); \r",
+							"\r",
+							"//Generar direcciones automáticamente\r",
+							"// Definimos algunos datos base para generar la dirección\r",
+							"const calles = [\"Avenida Providencia\", \"Calle Las Tranqueras\", \"Avenida Ossa\", \"Pasaje Central\"];\r",
+							"const ciudades = [\"Santiago\", \"Valparaíso\", \"Concepción\", \"La Serena\", \"Antofagasta\"];\r",
+							"const regiones = [\"Metropolitana\", \"Valparaíso\", \"Biobío\", \"Coquimbo\", \"Antofagasta\"];\r",
+							"\r",
+							"// Función para generar un número aleatorio dentro de un rango\r",
+							"function getRandomInt(min, max) {\r",
+							"    return Math.floor(Math.random() * (max - min + 1)) + min;\r",
+							"}\r",
+							"\r",
+							"// Creamos los componentes de la dirección\r",
+							"const calle = calles[getRandomInt(0, calles.length - 1)];\r",
+							"const numero = getRandomInt(100, 9999); // Número de calle\r",
+							"const ciudad = ciudades[getRandomInt(0, ciudades.length - 1)];\r",
+							"const region = regiones[getRandomInt(0, regiones.length - 1)];\r",
+							"\r",
+							"// Formateamos la dirección\r",
+							"const direccion = `${calle} ${numero}, ${ciudad}, ${region}, Chile`;\r",
+							"\r",
+							"// Guardamos la dirección generada como variable\r",
+							"pm.environment.set(\"direccion\", direccion); \r",
+							"\r",
+							"\r",
+							"// Generar Nombre completo de forma automática.\r",
+							"const nombres = [\"Juan\", \"María\", \"Pedro\", \"Ana\", \"Luis\", \"Camila\", \"Carlos\", \"Paula\"];\r",
+							"const apellidos = [\"González\", \"Rodríguez\", \"Pérez\", \"Soto\", \"Fernández\", \"López\", \"Muñoz\", \"Díaz\"];\r",
+							"\r",
+							"// Función para obtener un elemento aleatorio de una lista\r",
+							"function getRandomItem(arr) {\r",
+							"    return arr[Math.floor(Math.random() * arr.length)];\r",
+							"}\r",
+							"\r",
+							"// Generamos el nombre completo\r",
+							"const nombreCompleto = `${getRandomItem(nombres)} ${getRandomItem(apellidos)} ${getRandomItem(apellidos)}`;\r",
+							"\r",
+							"// Guardamos el nombre completo como una variable de Postman\r",
+							"pm.collectionVariables.set(\"nombreCompleto\", nombreCompleto);\r",
+							"\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } \r",
+							"            else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                // Reemplaza {{randomInt}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithRandomInt = body.replace(\"{{enroller_user_id_collector}}\", enroller_user_id_collector);\r",
+							"                bodyWithRandomInt = bodyWithRandomInt.replace(\"{{tax_id}}\", tax_id);\r",
+							"                bodyWithRandomInt = bodyWithRandomInt.replace(\"{{tax_id}}\", tax_id);\r",
+							"                bodyWithRandomInt = bodyWithRandomInt.replace(\"{{randomemail}}\", email);\r",
+							"                bodyWithRandomInt = bodyWithRandomInt.replace(\"{{direccion}}\", direccion);\r",
+							"                bodyWithRandomInt = bodyWithRandomInt.replace(\"{{nombreCompleto}}\", nombreCompleto);\r",
+							"                \r",
+							"                let bodyJson = JSON.parse(bodyWithRandomInt);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const body = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Creación de comercio exitosa\", function () {\r",
+							"    pm.expect(body).to.have.property('user');\r",
+							"    pm.expect(body.user).to.be.an(\"object\");\r",
+							"    pm.expect(body.user).to.have.property('enroller_user_id');\r",
+							"    pm.response.to.have.status(200);\r",
+							"\r",
+							"    \r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector}}\",\r\n    \"name\": \"{{nombreCompleto}}\",\r\n    \"email\": \"{{randomemail}}\",\r\n    \"user_type\": \"collector\",\r\n    \"tax_id\": \"{{tax_id}}\",\r\n    \"account\": {\r\n        \"type\": \"001\",\r\n        \"tax_id\": \"{{tax_id}}\",\r\n        \"id\": \"1381032\",\r\n        \"owner_id\": \"028\"\r\n    },\r\n    \"settlement\": {\r\n        \"schedule\": {\r\n            \"mode\": \"DAYS_OF_WEEK\",\r\n            \"value\": [\r\n                4,\r\n                5\r\n            ]\r\n        }\r\n    },\r\n    \"gloss\": \"Comercio Redpay\",\r\n    \"tax_address\": \"{{direccion}}\",\r\n    \"geo\": {\r\n        \"lat\": 4.678591,\r\n        \"lng\": -74.049975\r\n    }\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/user",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 exitosamente",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Generación exitosa de un token T0\", function () {\r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.have.property('payment_token').that.is.a(\"object\");;\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('detail').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('token_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('lifetime').that.is.a(\"number\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('extra_data').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('reusability').that.is.a(\"number\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('enroller_user_id').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('token_number').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('token_url').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('token_type').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('data').that.is.a(\"object\");\r",
+							"    pm.expect(pm.response.json().payment_token.data).to.have.property('amount').that.is.a(\"number\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"pm.environment.set(\"token_uuid\", jsonData.payment_token.token_uuid);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector}}\",\r\n    \"detail\": \"Compra en establecimiento Redpay\",\r\n    \"extra_data\": \"{aja}\",\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000000\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 enroller user id vacío 01-001",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar error 400 al enviar el request con el campo enroller user id vacío\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('01-001');\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal(\"enroller_user_id can't be empty\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"\",\r\n    \"detail\": \"Compra en establecimiento Redpay\",\r\n    \"extra_data\": \"{aja}\",\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000000\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 amount 0 01-002",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar un error 400 al enviar el campo amount en 0\", function () {\r",
+							"    \r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('01-002')\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal('amount must be greater');\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector}}\",\r\n    \"detail\": \"Compra en establecimiento Redpay\",\r\n    \"extra_data\": \"{aja}\",\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 0\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 amount inválido 01-003",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar error 400 al enviar un amount mayor a 7000000\", function () {\r",
+							"    \r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('01-003')\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal('amount must be less');\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector}}\",\r\n    \"detail\": \"Compra en establecimiento Redpay\",\r\n    \"extra_data\": \"{aja}\",\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000001\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 lifetime inválido 01-004",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar error 400 al enviar un lifetime mayor a 315360000\", function () {\r",
+							"    \r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('01-004')\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal('lifetime must be less');\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector}}\",\r\n    \"detail\": \"Compra en establecimiento Redpay\",\r\n    \"extra_data\": \"{aja}\",\r\n    \"lifetime\": 315360001,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000000\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 enroller user id requiere activation 01-005",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar error 400 al ingresar un enroller user id de un comercio que requiere activación en portal de cartolas\", function () {\r",
+							"    \r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('01-005')\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal('target account requiere activation');\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"419457\",\r\n    \"detail\": \"Compra en establecimiento Redpay\",\r\n    \"extra_data\": \"{aja}\",\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000000\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 (T8) 01-006",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar error 500 al ingresar un token type que no existe\", function () {\r",
+							"    \r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('01-006')\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal('this token type cannot be processed');\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(500);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector\",\r\n    \"detail\": \"Compra en establecimiento Redpay\",\r\n    \"extra_data\": \"{aja}\",\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000000\r\n    },\r\n    \"token_type\": \"T9\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 sin data 01-008",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar código 400 al enviar el request sin el campo data\", function () {\r",
+							"    \r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('01-008')\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal('This token_type needs to have the data property');\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector}}\",\r\n    \"detail\": \"Compra en establecimiento Redpay\",\r\n    \"extra_data\": \"{aja}\",\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token extra data a object 01-009",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar error 400 al enviar un extra data con formato distinto a string\", function () {\r",
+							"    \r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('01-009')\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal('extra_data must be an string | invalid extra_data size');\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector\",\r\n    \"detail\": \"Compra en establecimiento Redpay\",\r\n    \"extra_data\": { \"CartID\": 2323221 },\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000000\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 user not found 00-011",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar error 400 al ingresar un enroller user id que no existe\", function () {\r",
+							"    \r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('00-011')\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal('user not found');\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"41945777\",\r\n    \"detail\": \"Compra en establecimiento Redpay\",\r\n    \"extra_data\": \"{aja}\",\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000000\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 detail a object E-001",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar error 400 al enviar un detail en formato distinto a sting\", function () {\r",
+							"    \r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('E-001')\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal('qri.PaymentToken validation failed: detail: detail must be an string | invalid detail size');\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector}}\",\r\n    \"detail\": {\"detalle\": \"Compra en establecimiento Redpay\"},\r\n    \"extra_data\": \"Hola soy una venta\",\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000000\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 con extra data en NULL 200",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Generación exitosa de un token T0 enviando extra data en null\", function () {\r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.have.property('payment_token').that.is.a(\"object\");;\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('detail').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('token_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('lifetime').that.is.a(\"number\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('extra_data');\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('reusability').that.is.a(\"number\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('enroller_user_id').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('token_number').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('token_url').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('token_type').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().payment_token).to.have.property('data').that.is.a(\"object\");\r",
+							"    pm.expect(pm.response.json().payment_token.data).to.have.property('amount').that.is.a(\"number\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector}}\",\r\n    \"detail\": \"Compra en establecimiento Redpay\",\r\n    \"extra_data\": null,\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000000\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 + 100 caracteres en detail E-001",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar error 400 al ingresar más de 100 caracteres en el campo detail\", function () {\r",
+							"    \r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('E-001')\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal(\"qri.PaymentToken validation failed: detail: Path `detail` (`Compra online E-Commerce55555555555555555555555555555555555555555555555555555555555555555555555555555`) is longer than the maximum allowed length (100).\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector}}\",\r\n    \"detail\": \"Compra online E-Commerce55555555555555555555555555555555555555555555555555555555555555555555555555555\",\r\n    \"extra_data\": \"Compra agua\",\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000000\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		},
+		{
+			"name": "Generar un token T0 + 2000 caracteres en extra data",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const SECRET=\"90d966f496e3a3831efb5f3f8a01ba5ad8883479c8e62e55d4656471c5f6508b\";\r",
+							"const CRYPTOJS_CDN=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\";\r",
+							"const JSONABC_CDN=\"https://novicelab.org/jsonabc/dist/jsonabc.js\";\r",
+							"\r",
+							"(() => {\r",
+							"    pm.sendRequest(CRYPTOJS_CDN, (e, r) => {\r",
+							"        eval(r.text());\r",
+							"        pm.sendRequest(JSONABC_CDN, (e, r) => {\r",
+							"            const jsonabc = eval(r.text())(\"jsonabc\");\r",
+							"            const generateSignature = (data, secret) => {\r",
+							"                data = jsonabc.sortObj(data);\r",
+							"                let stringToSign = \"\";\r",
+							"                Object.keys(data).sort().forEach(key => {\r",
+							"                    if (key !== \"signature\" && data.hasOwnProperty(key)) {\r",
+							"                        stringToSign += key + JSON.stringify(data[key]);\r",
+							"                    }\r",
+							"                });\r",
+							"                return CryptoJS.HmacSHA256(stringToSign, secret).toString(CryptoJS.enc.Hex);\r",
+							"            };\r",
+							"\r",
+							"            if (pm.request.method === \"GET\") {\r",
+							"                const queryParams = {};\r",
+							"                pm.request.url.query.each(param => {\r",
+							"                    if (!param.disabled) {\r",
+							"                        queryParams[param.key] = param.value;\r",
+							"                    }\r",
+							"                });\r",
+							"                pm.request.url.query.add({ key: \"signature\", value: generateSignature(queryParams, SECRET) });\r",
+							"            } else {\r",
+							"                const body = pm.request.body.raw;\r",
+							"                console.log()\r",
+							"                // Reemplaza {{token_type}} en el cuerpo de la solicitud con el valor generado\r",
+							"                let bodyWithFields = body.replace(\"{{token_type}}\", pm.environment.get(\"token_type\"));\r",
+							"                bodyWithFields = bodyWithFields.replace(\"{{enroller_user_id_collector}}\", pm.environment.get(\"enroller_user_id_collector\"));\r",
+							"                let bodyJson = JSON.parse(bodyWithFields);\r",
+							"                bodyJson.signature = generateSignature(bodyJson, SECRET);\r",
+							"                pm.request.body.raw = JSON.stringify(bodyJson);\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"})();"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Debería arrojar error 400 al ingresar más de 2000 caracteres en el campo extra data\", function () {\r",
+							"    \r",
+							"    \r",
+							"    pm.expect(pm.response.json()).to.be.an(\"object\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('status_code').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json().status_code).to.be.equal('01-009')\r",
+							"    pm.expect(pm.response.json()).to.have.property('message').that.is.a(\"string\").to.be.equal('extra_data must be an string | invalid extra_data size');\r",
+							"    pm.expect(pm.response.json()).to.have.property('operation_uuid').that.is.a(\"string\");\r",
+							"    pm.expect(pm.response.json()).to.have.property('signature').that.is.a(\"string\");\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"enroller_user_id\": \"{{enroller_user_id_collector}}\",\r\n    \"detail\": \"Compra online\",\r\n    \"extra_data\": \"CV+LMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK--------------------------------------------------------------------------------------------------------------------------------------------------ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYCV+LMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK--------------------------------------------------------------------------------------------------------------------------------------------------ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY2222222222 223\",\r\n    \"lifetime\": 500,\r\n    \"reusability\": 1,\r\n    \"data\": {\r\n        \"amount\": 7000000\r\n    },\r\n    \"token_type\": \"T0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/payment-token/generate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"payment-token",
+						"generate"
+					]
+				},
+				"description": "This returns a `token` that you can use to retrieve information later on.\n\nWe have included a test to confirm if a token is returned. We have also added test scripts to copy the token to the `token` collection variable. This makes it easy for us to reuse this token in other requests in the collection."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.environment.set(\"token_type\", \"T0\");"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "randomInt",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "account_tax_id",
+			"value": "76222222-1",
+			"type": "string"
+		},
+		{
+			"key": "account_id",
+			"value": "1381032",
+			"type": "string"
+		},
+		{
+			"key": "account_owner_id",
+			"value": "028",
+			"type": "string"
+		},
+		{
+			"key": "account_type",
+			"value": "001",
+			"type": "string"
+		},
+		{
+			"key": "variable_id_payer",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "variable_id_collector",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "token_type",
+			"value": "T0",
+			"type": "string"
+		},
+		{
+			"key": "nombreCompleto",
+			"value": ""
+		}
+	]
+}
